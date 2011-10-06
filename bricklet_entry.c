@@ -22,6 +22,7 @@
 #include "bricklet_entry.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #include "bricklib/bricklet/bricklet_config.h"
 #include "config.h"
@@ -46,6 +47,16 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 
 		case BRICKLET_TYPE_TICK: {
 			tick();
+			break;
+		}
+
+		case BRICKLET_TYPE_INFO: {
+			BrickletInfo *bi = (BrickletInfo*)data;
+			bi->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
+			bi->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
+			bi->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
+			memset(bi->name, 0, MAX_LENGTH_NAME);
+			strcpy(bi->name, BRICKLET_HARDWARE_NAME);
 			break;
 		}
 	}
