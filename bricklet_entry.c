@@ -55,8 +55,15 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 			bi->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
 			bi->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
 			bi->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
-			memset(bi->name, 0, MAX_LENGTH_NAME);
-			strcpy(bi->name, BRICKLET_HARDWARE_NAME);
+			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
+				bi->name[i] = 0;
+			}
+			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
+				bi->name[i] = BRICKLET_HARDWARE_NAME[i];
+				if(BRICKLET_HARDWARE_NAME[i] == '\0') {
+					break;
+				}
+			}
 			break;
 		}
 	}
