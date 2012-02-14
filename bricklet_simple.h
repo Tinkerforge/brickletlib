@@ -139,7 +139,7 @@ typedef struct {
 void simple_invocation(uint8_t com, uint8_t *data);
 void simple_constructor(void);
 void simple_destructor(void);
-void simple_tick(void);
+void simple_tick(uint8_t tick_type);
 #endif
 
 #endif

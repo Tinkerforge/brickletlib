@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "bricklib/bricklet/bricklet_config.h"
+#include "bricklib/utility/init.h"
 #include "config.h"
 
 #ifndef ENTRY_IN_BRICKLET_CODE
@@ -46,7 +47,12 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 		}
 
 		case BRICKLET_TYPE_TICK: {
-			tick();
+			// Backward compatibility to versions without tick type
+			if(data == NULL) {
+				tick(TICK_TASK_TYPE_MESSAGE | TICK_TASK_TYPE_CALCULATION);
+			} else {
+				tick(*data);
+			}
 			break;
 		}
 

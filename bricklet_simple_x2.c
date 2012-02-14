@@ -27,6 +27,8 @@
 
 #include <adc/adc.h>
 #include <bricklib/bricklet/bricklet_communication.h>
+#include <bricklib/utility/util_definitions.h>
+#include <bricklib/utility/init.h>
 
 #include "config.h"
 
@@ -219,86 +221,92 @@ void simple_destructor(void) {
 	logbli("simple destructor\n\r");
 }
 
-void simple_tick(void) {
-	// Get values
-    for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-    	if(BC->tick % 2) {
-    		BC->value1[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func1)(BC->value1[sup[i].call_value_id]);
-    	} else {
-    		BC->value2[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func2)(BC->value2[sup[i].call_value_id]);
-    	}
-    }
-
-    BC->tick++;
-
-    // Handle period signals
-    for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-    	if(BC->signal_period[i] != 0 &&
-    	   BC->signal_period[i] <= BC->signal_period_counter[i]) {
-    		if(BC->last_value1[i] != BC->value1[i] ||
-    		   BC->last_value2[i] != BC->value2[i]) {
-        		SimpleGetValueReturn sgvr = {
-        			BS->stack_id,
-        			sup[i].type_period,
-        			sizeof(SimpleGetValueReturn),
-        			BC->value1[i],
-        			BC->value2[i]
-        		};
-
-        		BA->send_blocking_with_timeout(&sgvr,
-        		                               sizeof(SimpleGetValueReturn),
-        		                               *BA->com_current);
-
-        		//logbli("period value: %d %d\n\r", BC->value1[i],
-        		//                                 BC->value2[i]);
-        		BC->signal_period_counter[i] = 0;
-        		BC->last_value1[i] = BC->value1[i];
-        		BC->last_value2[i] = BC->value2[i];
-    		}
-    	} else {
-    		BC->signal_period_counter[i]++;
-    	}
-    }
-
-    // Handle threshold signals
-    for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-    	int32_t value1 = BC->value1[i];
-    	int32_t value2 = BC->value2[i];
-
-		if(((BC->threshold_option[i] == 'o') &&
-		    ((value1 < BC->threshold_min1[i]) ||
-		     (value1 > BC->threshold_max1[i])) &&
-		    ((value2 < BC->threshold_min2[i]) ||
-		     (value2 > BC->threshold_max2[i]))) ||
-		   ((BC->threshold_option[i] == 'i') &&
-		    ((value1 > BC->threshold_min1[i]) &&
-		     (value1 < BC->threshold_max1[i])) &&
-		    ((value2 > BC->threshold_min2[i]) &&
-		     (value2 < BC->threshold_max2[i])))) {
-
-			if(BC->threshold_period_current[i] == BC->threshold_debounce) {
-	    		SimpleGetValueReturn sgvr = {
-	    			BS->stack_id,
-	    			sup[i].type_reached,
-	    			sizeof(SimpleGetValueReturn),
-	    			BC->value1[i],
-	    			BC->value2[i]
-	    		};
-	    		BA->send_blocking_with_timeout(&sgvr,
-    		                                   sizeof(SimpleGetValueReturn),
-    		                                   *BA->com_current);
-				BC->threshold_period_current[i] = 0;
-
-				logbli("threshold value: %d %d\n\r", BC->value1[i],
-				                                     BC->value2[i]);
+void simple_tick(uint8_t tick_type) {
+	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
+		// Get values
+		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
+			if(BC->tick % 2) {
+				BC->value1[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func1)(BC->value1[sup[i].call_value_id]);
 			} else {
-				BC->threshold_period_current[i]++;
+				BC->value2[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func2)(BC->value2[sup[i].call_value_id]);
 			}
-		} else {
+		}
+
+		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
+			if(BC->signal_period_counter[i] < UINT32_MAX) {
+				BC->signal_period_counter[i]++;
+			}
+
 			if(BC->threshold_period_current[i] != BC->threshold_debounce) {
 				BC->threshold_period_current[i]++;
 			}
 		}
-    }
+
+		BC->tick++;
+	}
+
+	if(tick_type & TICK_TASK_TYPE_MESSAGE) {
+		// Handle period signals
+		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
+			if(BC->signal_period[i] != 0 &&
+			   BC->signal_period[i] <= BC->signal_period_counter[i]) {
+				if(BC->last_value1[i] != BC->value1[i] ||
+				   BC->last_value2[i] != BC->value2[i]) {
+					SimpleGetValueReturn sgvr = {
+						BS->stack_id,
+						sup[i].type_period,
+						sizeof(SimpleGetValueReturn),
+						BC->value1[i],
+						BC->value2[i]
+					};
+
+					BA->send_blocking_with_timeout(&sgvr,
+												   sizeof(SimpleGetValueReturn),
+												   *BA->com_current);
+
+					BC->signal_period_counter[i] = 0;
+					BC->last_value1[i] = BC->value1[i];
+					BC->last_value2[i] = BC->value2[i];
+					logbli("period value: %d %d\n\r", BC->value1[i],
+					                                  BC->value2[i]);
+				}
+			}
+		}
+
+		// Handle threshold signals
+		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
+			int32_t value1 = BC->value1[i];
+			int32_t value2 = BC->value2[i];
+
+			if(((BC->threshold_option[i] == 'o') &&
+				((value1 < BC->threshold_min1[i]) ||
+				 (value1 > BC->threshold_max1[i])) &&
+				((value2 < BC->threshold_min2[i]) ||
+				 (value2 > BC->threshold_max2[i]))) ||
+			   ((BC->threshold_option[i] == 'i') &&
+				((value1 > BC->threshold_min1[i]) &&
+				 (value1 < BC->threshold_max1[i])) &&
+				((value2 > BC->threshold_min2[i]) &&
+				 (value2 < BC->threshold_max2[i])))) {
+
+				if(BC->threshold_period_current[i] == BC->threshold_debounce) {
+					SimpleGetValueReturn sgvr = {
+						BS->stack_id,
+						sup[i].type_reached,
+						sizeof(SimpleGetValueReturn),
+						BC->value1[i],
+						BC->value2[i]
+					};
+					BA->send_blocking_with_timeout(&sgvr,
+												   sizeof(SimpleGetValueReturn),
+												   *BA->com_current);
+					BC->threshold_period_current[i] = 0;
+
+					logbli("threshold value: %d %d\n\r", BC->value1[i],
+														 BC->value2[i]);
+				}
+			}
+		}
+	}
 }
 #endif
