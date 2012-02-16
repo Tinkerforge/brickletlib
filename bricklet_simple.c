@@ -200,7 +200,6 @@ void simple_destructor(void) {
 }
 
 void simple_tick(uint8_t tick_type) {
-	BA->printf("tt: %d\n\r", tick_type);
 	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
 		// Get values
 
