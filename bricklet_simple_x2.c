@@ -280,7 +280,7 @@ void simple_tick(uint8_t tick_type) {
 
 			if(((BC->threshold_option[i] == 'o') &&
 				((value1 < BC->threshold_min1[i]) ||
-				 (value1 > BC->threshold_max1[i])) &&
+				 (value1 > BC->threshold_max1[i])) ||
 				((value2 < BC->threshold_min2[i]) ||
 				 (value2 > BC->threshold_max2[i]))) ||
 			   ((BC->threshold_option[i] == 'i') &&
