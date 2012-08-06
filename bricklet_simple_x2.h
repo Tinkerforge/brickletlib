@@ -38,6 +38,10 @@
 #define SIMPLE_SIGNEDNESS_UINT 0
 #define SIMPLE_SIGNEDNESS_INT  1
 
+#ifndef SIMPLE_VALUE_TYPE
+	#define SIMPLE_VALUE_TYPE int16_t
+#endif
+
 typedef struct {
 	uint8_t unit;
 	uint8_t transfer;
@@ -57,8 +61,8 @@ typedef struct {
 	uint8_t stack_id;
 	uint8_t type;
 	uint16_t length;
-	uint16_t value1;
-	uint16_t value2;
+	SIMPLE_VALUE_TYPE value1;
+	SIMPLE_VALUE_TYPE value2;
 } __attribute__((__packed__)) SimpleStandardMessage;
 
 typedef struct {
@@ -71,8 +75,8 @@ typedef struct {
 	uint8_t stack_id;
 	uint8_t type;
 	uint16_t length;
-	int16_t value1;
-	int16_t value2;
+	SIMPLE_VALUE_TYPE value1;
+	SIMPLE_VALUE_TYPE value2;
 } __attribute__((__packed__)) SimpleGetValueReturn;
 
 typedef struct {
@@ -120,10 +124,10 @@ typedef struct {
 	uint8_t type;
 	uint16_t length;
 	char option;
-	int16_t min1;
-	int16_t max1;
-	int16_t min2;
-	int16_t max2;
+	SIMPLE_VALUE_TYPE min1;
+	SIMPLE_VALUE_TYPE max1;
+	SIMPLE_VALUE_TYPE min2;
+	SIMPLE_VALUE_TYPE max2;
 } __attribute__((__packed__)) SimpleSetThreshold;
 
 typedef struct {
@@ -137,10 +141,10 @@ typedef struct {
 	uint8_t type;
 	uint16_t length;
 	char option;
-	int16_t min1;
-	int16_t max1;
-	int16_t min2;
-	int16_t max2;
+	SIMPLE_VALUE_TYPE min1;
+	SIMPLE_VALUE_TYPE max1;
+	SIMPLE_VALUE_TYPE min2;
+	SIMPLE_VALUE_TYPE max2;
 } __attribute__((__packed__)) SimpleGetThresholdReturn;
 
 void simple_invocation(uint8_t com, uint8_t *data);
