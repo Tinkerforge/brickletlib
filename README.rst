@@ -2,7 +2,7 @@ Bricklet Library
 ================
 
 This repository contains the generic source code that is used by all Bricklets
-(Joystick, Poti, LCD, Dual Relay, IR Distance, etc)
+(Joystick, Poti, LCD, Dual Relay, Distance IR, etc.)
 
 Usage
 -----
