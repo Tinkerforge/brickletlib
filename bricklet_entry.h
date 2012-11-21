@@ -1,5 +1,5 @@
 /* brickletlib
- * Copyright (C) 2010 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2010-2012 Olaf Lüke <olaf@tinkerforge.com>
  *
  * bricklet_entry.h: Implementation of bricklet entry
  *
@@ -33,7 +33,9 @@ typedef int32_t (*value_handler_func_t)(int32_t);
 
 #define BA (*((BrickletAPI**)(((int)entry)-1 + BRICKLET_PLUGIN_MAX_SIZE - 4)))
 #define BS (*((BrickletSettings**)(((int)entry)-1 + BRICKLET_PLUGIN_MAX_SIZE - 8)))
+#define BSO(diff) (*((BrickletSettings**)(((int)entry)-1 + BRICKLET_PLUGIN_MAX_SIZE + ((diff)*0x1000) - 8)))
 #define BC (*((BrickContext**)(((int)entry)-1 + BRICKLET_PLUGIN_MAX_SIZE - 12)))
+#define BCO(diff) (*((BrickContext**)(((int)entry)-1 + BRICKLET_PLUGIN_MAX_SIZE + ((diff)*0x1000) - 12)))
 
 #define ENTRY_ADDRESS ((int)entry)
 #define BRICKLET_OFFSET(func) ((message_handler_func_t)(((int)func) + ENTRY_ADDRESS - 1))

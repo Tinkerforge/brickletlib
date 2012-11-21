@@ -1,5 +1,5 @@
 /* brickletlib
- * Copyright (C) 2010 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2010-2012 Olaf Lüke <olaf@tinkerforge.com>
  *
  * bricklet_entry.c: Implementation of bricklet entry
  *
@@ -29,7 +29,7 @@
 #include "config.h"
 
 #ifndef ENTRY_IN_BRICKLET_CODE
-void entry(uint8_t type, uint8_t com, uint8_t *data) {
+void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 	switch(type) {
 		case BRICKLET_TYPE_INVOCATION: {
 			invocation(com, data);
@@ -57,19 +57,14 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 		}
 
 		case BRICKLET_TYPE_INFO: {
-			BrickletInfo *bi = (BrickletInfo*)data;
-			bi->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
-			bi->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
-			bi->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
-			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
-				bi->name[i] = 0;
-			}
-			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
-				bi->name[i] = BRICKLET_HARDWARE_NAME[i];
-				if(BRICKLET_HARDWARE_NAME[i] == '\0') {
-					break;
-				}
-			}
+			BrickletSettings *bs = (BrickletSettings*)data;
+			bs->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
+			bs->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
+			bs->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
+			bs->hardware_version[0] = BRICKLET_HARDWARE_VERSION_MAJOR;
+			bs->hardware_version[1] = BRICKLET_HARDWARE_VERSION_MINOR;
+			bs->hardware_version[2] = BRICKLET_HARDWARE_VERSION_REVISION;
+			bs->device_identifier   = BRICKLET_DEVICE_IDENTIFIER;
 			break;
 		}
 	}

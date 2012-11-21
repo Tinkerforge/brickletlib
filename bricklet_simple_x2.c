@@ -1,5 +1,5 @@
 /* brickletlib
- * Copyright (C) 2011 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2011-2012 Olaf Lüke <olaf@tinkerforge.com>
  *
  * bricklet_simple_x2.c: Functionality for simple sensor bricklets with 2 values
  *
@@ -25,10 +25,9 @@
 
 #include <stdint.h>
 
-#include <adc/adc.h>
-#include <bricklib/bricklet/bricklet_communication.h>
-#include <bricklib/utility/util_definitions.h>
-#include <bricklib/utility/init.h>
+#include "bricklib/drivers/adc/adc.h"
+#include "bricklib/bricklet/bricklet_communication.h"
+#include "bricklib/utility/init.h"
 
 #include "config.h"
 
@@ -36,9 +35,14 @@
 
 extern const SimpleMessageProperty smp[];
 extern const SimpleUnitProperty sup[];
+extern const uint8_t smp_length;
 
-void simple_invocation(uint8_t com, uint8_t *data) {
-	uint8_t id = ((SimpleStandardMessage*)data)->type - 1;
+void simple_invocation(const ComType com, const uint8_t *data) {
+	uint8_t id = ((SimpleStandardMessage*)data)->header.fid - 1;
+	if(id >= smp_length) {
+		return;
+	}
+
 	if(smp[id].direction == SIMPLE_DIRECTION_SET) {
 		switch(smp[id].transfer) {
 			case SIMPLE_TRANSFER_VALUE: {
@@ -82,7 +86,7 @@ void simple_invocation(uint8_t com, uint8_t *data) {
 					BC->threshold_min2[smp[id].unit] = -2147483647;
 					BC->threshold_max2[smp[id].unit] = sst->min2;
 				} else {
-					// TODO: Error?
+					BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_NOT_SUPPORTED, com);
 				}
 
 				BC->threshold_period_current[smp[id].unit] = BC->threshold_debounce;
@@ -103,18 +107,25 @@ void simple_invocation(uint8_t com, uint8_t *data) {
 				logbli("set debounce: %d\n\r", ssd->debounce);
 				break;
 			}
+
+			switch(smp[id].transfer) {
+				case SIMPLE_TRANSFER_PERIOD:
+				case SIMPLE_TRANSFER_DEBOUNCE:
+				case SIMPLE_TRANSFER_THRESHOLD: {
+					BA->com_return_setter(com, data);
+					break;
+				}
+			}
 		}
 	} else if(smp[id].direction == SIMPLE_DIRECTION_GET) {
 		switch(smp[id].transfer) {
 			case SIMPLE_TRANSFER_VALUE: {
 				SimpleGetValue* sgv = (SimpleGetValue*)data;
-				SimpleGetValueReturn sgvr = {
-					sgv->stack_id,
-					sgv->type,
-					sizeof(SimpleGetValueReturn),
-					BC->value1[smp[id].unit],
-					BC->value2[smp[id].unit]
-				};
+				SimpleGetValueReturn sgvr;
+				BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sgv->header.fid);
+
+				sgvr.value1 = BC->value1[smp[id].unit];
+				sgvr.value2 = BC->value2[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgvr,
 				                               sizeof(SimpleGetValueReturn),
@@ -126,12 +137,10 @@ void simple_invocation(uint8_t com, uint8_t *data) {
 
 			case SIMPLE_TRANSFER_PERIOD: {
 				SimpleGetPeriod* sgp = (SimpleGetPeriod*)data;
-				SimpleGetPeriodReturn sgpr = {
-					sgp->stack_id,
-					sgp->type,
-					sizeof(SimpleGetPeriodReturn),
-					BC->signal_period[smp[id].unit]
-				};
+				SimpleGetPeriodReturn sgpr;
+
+				BA->com_make_default_header(&sgpr, BS->uid, sizeof(SimpleGetPeriodReturn), sgp->header.fid);
+				sgpr.period = BC->signal_period[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgpr,
 				                               sizeof(SimpleGetPeriodReturn),
@@ -143,16 +152,14 @@ void simple_invocation(uint8_t com, uint8_t *data) {
 
 			case SIMPLE_TRANSFER_THRESHOLD: {
 				SimpleGetThreshold* sgt = (SimpleGetThreshold*)data;
-				SimpleGetThresholdReturn sgtr = {
-					sgt->stack_id,
-					sgt->type,
-					sizeof(SimpleGetThresholdReturn),
-					BC->threshold_option_save[smp[id].unit],
-					BC->threshold_min_save1[smp[id].unit],
-					BC->threshold_max_save1[smp[id].unit],
-					BC->threshold_min_save2[smp[id].unit],
-					BC->threshold_max_save2[smp[id].unit]
-				};
+				SimpleGetThresholdReturn sgtr;
+
+				BA->com_make_default_header(&sgtr, BS->uid, sizeof(SimpleGetThresholdReturn), sgt->header.fid);
+				sgtr.option = BC->threshold_option_save[smp[id].unit];
+				sgtr.min1 = BC->threshold_min_save1[smp[id].unit];
+				sgtr.max1 = BC->threshold_max_save1[smp[id].unit];
+				sgtr.min2 = BC->threshold_min_save2[smp[id].unit];
+				sgtr.max2 = BC->threshold_max_save2[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgtr,
 				                               sizeof(SimpleGetThresholdReturn),
@@ -169,12 +176,10 @@ void simple_invocation(uint8_t com, uint8_t *data) {
 
 			case SIMPLE_TRANSFER_DEBOUNCE: {
 				SimpleGetDebounce* sgd = (SimpleGetDebounce*)data;
-				SimpleGetDebounceReturn sgdr = {
-					sgd->stack_id,
-					sgd->type,
-					sizeof(SimpleGetDebounceReturn),
-					BC->threshold_debounce
-				};
+				SimpleGetDebounceReturn sgdr;
+
+				BA->com_make_default_header(&sgdr, BS->uid, sizeof(SimpleGetThresholdReturn), sgd->header.fid);
+				sgdr.debounce = BC->threshold_debounce;
 
 				BA->send_blocking_with_timeout(&sgdr,
 				                               sizeof(SimpleGetDebounceReturn),
@@ -252,13 +257,10 @@ void simple_tick(uint8_t tick_type) {
 			   BC->signal_period[i] <= BC->signal_period_counter[i]) {
 				if(BC->last_value1[i] != BC->value1[i] ||
 				   BC->last_value2[i] != BC->value2[i]) {
-					SimpleGetValueReturn sgvr = {
-						BS->stack_id,
-						sup[i].type_period,
-						sizeof(SimpleGetValueReturn),
-						BC->value1[i],
-						BC->value2[i]
-					};
+					SimpleGetValueReturn sgvr;
+					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_period);
+					sgvr.value1 = BC->value1[i];
+					sgvr.value2 = BC->value2[i];
 
 					BA->send_blocking_with_timeout(&sgvr,
 												   sizeof(SimpleGetValueReturn),
@@ -269,6 +271,8 @@ void simple_tick(uint8_t tick_type) {
 					BC->last_value2[i] = BC->value2[i];
 					logbli("period value: %d %d\n\r", BC->value1[i],
 					                                  BC->value2[i]);
+
+					BA->printf("period value: %d %d\n\r", BC->value1[i], BC->value2[i]);
 				}
 			}
 		}
@@ -290,13 +294,10 @@ void simple_tick(uint8_t tick_type) {
 				  (value2 < BC->threshold_max2[i]))))) {
 
 				if(BC->threshold_period_current[i] == BC->threshold_debounce) {
-					SimpleGetValueReturn sgvr = {
-						BS->stack_id,
-						sup[i].type_reached,
-						sizeof(SimpleGetValueReturn),
-						BC->value1[i],
-						BC->value2[i]
-					};
+					SimpleGetValueReturn sgvr;
+					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_reached);
+					sgvr.value1 = value1;
+					sgvr.value2 = value2;
 					BA->send_blocking_with_timeout(&sgvr,
 												   sizeof(SimpleGetValueReturn),
 												   *BA->com_current);

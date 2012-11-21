@@ -1,5 +1,5 @@
 /* brickletlib
- * Copyright (C) 2011 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2011-2012 Olaf Lüke <olaf@tinkerforge.com>
  *
  * bricklet_simple_2x.h: Functionality for simple sensor bricklets with 2 values
  *
@@ -22,10 +22,11 @@
 #ifndef BRICKLET_SIMPLE_X2_H
 #define BRICKLET_SIMPLE_X2_H
 
+#include "config.h"
+
 #ifdef BRICKLET_HAS_SIMPLE_SENSOR_X2
 #include <stdint.h>
-
-#include "config.h"
+#include "bricklib/com/com.h"
 
 #define SIMPLE_TRANSFER_VALUE 0
 #define SIMPLE_TRANSFER_PERIOD 1
@@ -52,77 +53,57 @@ typedef struct {
 	value_handler_func_t func1;
 	value_handler_func_t func2;
 	uint8_t signedness;
-	uint8_t type_period;
-	uint8_t type_reached;
+	uint8_t fid_period;
+	uint8_t fid_reached;
 	uint8_t call_value_id;
 } SimpleUnitProperty;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	SIMPLE_VALUE_TYPE value1;
 	SIMPLE_VALUE_TYPE value2;
 } __attribute__((__packed__)) SimpleStandardMessage;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 } __attribute__((__packed__)) SimpleGetValue;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	SIMPLE_VALUE_TYPE value1;
 	SIMPLE_VALUE_TYPE value2;
 } __attribute__((__packed__)) SimpleGetValueReturn;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	uint32_t debounce;
 } __attribute__((__packed__)) SimpleSetDebounce;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 } __attribute__((__packed__)) SimpleGetDebounce;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	uint32_t debounce;
 } __attribute__((__packed__)) SimpleGetDebounceReturn;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	uint32_t period;
 } __attribute__((__packed__)) SimpleSetPeriod;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 } __attribute__((__packed__)) SimpleGetPeriod;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	uint32_t period;
 } __attribute__((__packed__)) SimpleGetPeriodReturn;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	char option;
 	SIMPLE_VALUE_TYPE min1;
 	SIMPLE_VALUE_TYPE max1;
@@ -131,15 +112,11 @@ typedef struct {
 } __attribute__((__packed__)) SimpleSetThreshold;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 } __attribute__((__packed__)) SimpleGetThreshold;
 
 typedef struct {
-	uint8_t stack_id;
-	uint8_t type;
-	uint16_t length;
+	MessageHeader header;
 	char option;
 	SIMPLE_VALUE_TYPE min1;
 	SIMPLE_VALUE_TYPE max1;
@@ -147,10 +124,10 @@ typedef struct {
 	SIMPLE_VALUE_TYPE max2;
 } __attribute__((__packed__)) SimpleGetThresholdReturn;
 
-void simple_invocation(uint8_t com, uint8_t *data);
+void simple_invocation(const ComType com, const uint8_t *data);
 void simple_constructor(void);
 void simple_destructor(void);
-void simple_tick(uint8_t tick_type);
+void simple_tick(const uint8_t tick_type);
 #endif
 
 #endif
