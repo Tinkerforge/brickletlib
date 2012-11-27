@@ -271,8 +271,6 @@ void simple_tick(uint8_t tick_type) {
 					BC->last_value2[i] = BC->value2[i];
 					logbli("period value: %d %d\n\r", BC->value1[i],
 					                                  BC->value2[i]);
-
-					BA->printf("period value: %d %d\n\r", BC->value1[i], BC->value2[i]);
 				}
 			}
 		}
