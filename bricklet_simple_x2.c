@@ -122,7 +122,8 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 			case SIMPLE_TRANSFER_VALUE: {
 				SimpleGetValue* sgv = (SimpleGetValue*)data;
 				SimpleGetValueReturn sgvr;
-				BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sgv->header.fid);
+				sgvr.header = sgv->header;
+				sgvr.header.length = sizeof(SimpleGetValueReturn);
 
 				sgvr.value1 = BC->value1[smp[id].unit];
 				sgvr.value2 = BC->value2[smp[id].unit];
@@ -138,8 +139,9 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 			case SIMPLE_TRANSFER_PERIOD: {
 				SimpleGetPeriod* sgp = (SimpleGetPeriod*)data;
 				SimpleGetPeriodReturn sgpr;
+				sgpr.header = sgp->header;
+				sgpr.header.length = sizeof(SimpleGetPeriodReturn);
 
-				BA->com_make_default_header(&sgpr, BS->uid, sizeof(SimpleGetPeriodReturn), sgp->header.fid);
 				sgpr.period = BC->signal_period[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgpr,
@@ -153,8 +155,9 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 			case SIMPLE_TRANSFER_THRESHOLD: {
 				SimpleGetThreshold* sgt = (SimpleGetThreshold*)data;
 				SimpleGetThresholdReturn sgtr;
+				sgtr.header = sgt->header;
+				sgtr.header.length = sizeof(SimpleGetThresholdReturn);
 
-				BA->com_make_default_header(&sgtr, BS->uid, sizeof(SimpleGetThresholdReturn), sgt->header.fid);
 				sgtr.option = BC->threshold_option_save[smp[id].unit];
 				sgtr.min1 = BC->threshold_min_save1[smp[id].unit];
 				sgtr.max1 = BC->threshold_max_save1[smp[id].unit];
@@ -177,8 +180,9 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 			case SIMPLE_TRANSFER_DEBOUNCE: {
 				SimpleGetDebounce* sgd = (SimpleGetDebounce*)data;
 				SimpleGetDebounceReturn sgdr;
+				sgdr.header = sgd->header;
+				sgdr.header.length = sizeof(SimpleGetThresholdReturn);
 
-				BA->com_make_default_header(&sgdr, BS->uid, sizeof(SimpleGetThresholdReturn), sgd->header.fid);
 				sgdr.debounce = BC->threshold_debounce;
 
 				BA->send_blocking_with_timeout(&sgdr,
