@@ -61,9 +61,15 @@ void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 			bs->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
 			bs->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
 			bs->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
+#ifdef BRICKLET_HARDWARE_VERSION_MAJOR
 			bs->hardware_version[0] = BRICKLET_HARDWARE_VERSION_MAJOR;
 			bs->hardware_version[1] = BRICKLET_HARDWARE_VERSION_MINOR;
 			bs->hardware_version[2] = BRICKLET_HARDWARE_VERSION_REVISION;
+#else
+			bs->hardware_version[0] = BC->hardware_version[0];
+			bs->hardware_version[1] = BC->hardware_version[1];
+			bs->hardware_version[2] = BC->hardware_version[2];
+#endif
 			bs->device_identifier   = BRICKLET_DEVICE_IDENTIFIER;
 			break;
 		}
