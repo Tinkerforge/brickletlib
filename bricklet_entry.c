@@ -1,5 +1,5 @@
 /* brickletlib
- * Copyright (C) 2010 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2010-2012 Olaf Lüke <olaf@tinkerforge.com>
  *
  * bricklet_entry.c: Implementation of bricklet entry
  *
@@ -61,6 +61,7 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 			bi->firmware_version[0] = BRICKLET_FIRMWARE_VERSION_MAJOR;
 			bi->firmware_version[1] = BRICKLET_FIRMWARE_VERSION_MINOR;
 			bi->firmware_version[2] = BRICKLET_FIRMWARE_VERSION_REVISION;
+#ifdef BRICKLET_HARDWARE_NAME
 			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
 				bi->name[i] = 0;
 			}
@@ -70,6 +71,17 @@ void entry(uint8_t type, uint8_t com, uint8_t *data) {
 					break;
 				}
 			}
+#else
+			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
+				bi->name[i] = 0;
+			}
+			for(uint8_t i = 0; i < MAX_LENGTH_NAME; i++) {
+				bi->name[i] = BC->hardware_name[i];
+				if(BC->hardware_name[i] == '\0') {
+					break;
+				}
+			}
+#endif
 			break;
 		}
 	}
