@@ -73,6 +73,11 @@ void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 			bs->device_identifier   = BRICKLET_DEVICE_IDENTIFIER;
 			break;
 		}
+
+		case BRICKLET_TYPE_PROTOCOL_VERSION: {
+			*data = 2;
+			break;
+		}
 	}
 }
 #endif
