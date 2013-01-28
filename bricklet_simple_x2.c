@@ -107,14 +107,14 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				logbli("set debounce: %d\n\r", ssd->debounce);
 				break;
 			}
+		}
 
-			switch(smp[id].transfer) {
-				case SIMPLE_TRANSFER_PERIOD:
-				case SIMPLE_TRANSFER_DEBOUNCE:
-				case SIMPLE_TRANSFER_THRESHOLD: {
-					BA->com_return_setter(com, data);
-					break;
-				}
+		switch(smp[id].transfer) {
+			case SIMPLE_TRANSFER_PERIOD:
+			case SIMPLE_TRANSFER_DEBOUNCE:
+			case SIMPLE_TRANSFER_THRESHOLD: {
+				BA->com_return_setter(com, data);
+				break;
 			}
 		}
 	} else if(smp[id].direction == SIMPLE_DIRECTION_GET) {
