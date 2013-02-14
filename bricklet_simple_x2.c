@@ -234,9 +234,9 @@ void simple_tick(uint8_t tick_type) {
 	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
 		// Get values
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			if(BC->tick % 2) {
+			if(BC->tick % 6 == 2) {
 				BC->value1[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func1)(BC->value1[sup[i].call_value_id]);
-			} else {
+			} else if(BC->tick % 6 == 5){
 				BC->value2[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func2)(BC->value2[sup[i].call_value_id]);
 			}
 		}
