@@ -280,11 +280,6 @@ void simple_tick(const uint8_t tick_type) {
 					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_reached);
 					sgvr.value = value;
 
-
-					BA->send_blocking_with_timeout(&sgvr,
-												   sizeof(SimpleGetValueReturn),
-												   *BA->com_current);
-
 					BA->send_blocking_with_timeout(&sgvr,
 												   sizeof(SimpleGetValueReturn),
 												   *BA->com_current);
