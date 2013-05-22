@@ -87,6 +87,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 					BC->threshold_max2[smp[id].unit] = sst->min2;
 				} else {
 					BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+					return;
 				}
 
 				BC->threshold_period_current[smp[id].unit] = BC->threshold_debounce;
