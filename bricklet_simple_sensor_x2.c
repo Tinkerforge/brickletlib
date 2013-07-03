@@ -1,7 +1,7 @@
 /* brickletlib
- * Copyright (C) 2011-2012 Olaf Lüke <olaf@tinkerforge.com>
+ * Copyright (C) 2013 Olaf Lüke <olaf@tinkerforge.com>
  *
- * bricklet_simple_x2.c: Functionality for simple sensor bricklets with 2 values
+ * bricklet_simple_sensor_x2.c: Functionality for simple bricklets with two identical sensors
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,7 +19,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "bricklet_simple_x2.h"
+#include "bricklet_simple_sensor_x2.h"
 
 #ifdef BRICKLET_HAS_SIMPLE_SENSOR_SENSOR_X2
 
@@ -37,8 +37,9 @@ extern const SimpleMessageProperty smp[];
 extern const SimpleUnitProperty sup[];
 extern const uint8_t smp_length;
 
-void simple_invocation(const ComType com, const uint8_t *data) {
-	uint8_t id = ((SimpleStandardMessage*)data)->header.fid - 1;
+void simple_invocation(const uint8_t com, const uint8_t *data) {
+	SimpleStandardMessage *standard_message = (SimpleStandardMessage*)data;
+	uint8_t id = standard_message->header.fid - 1;
 	if(id >= smp_length) {
 		return;
 	}
@@ -51,52 +52,42 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 			case SIMPLE_TRANSFER_PERIOD: {
 				SimpleSetPeriod *ssp = ((SimpleSetPeriod*)data);
-				BC->signal_period[smp[id].unit] = ssp->period;
+				BC->signal_period[ssp->sensor] = ssp->period;
 
-				logbli("set period: %d\n\r", ssp->period);
+				logbli("set period (%d): %d\n\r", ssp->sensor, ssp->period);
 				break;
 			}
 
 			case SIMPLE_TRANSFER_THRESHOLD: {
 				SimpleSetThreshold* sst = (SimpleSetThreshold*)data;
-				BC->threshold_option_save[smp[id].unit] = sst->option;
-				BC->threshold_min_save1[smp[id].unit] = sst->min1;
-				BC->threshold_max_save1[smp[id].unit] = sst->max1;
-				BC->threshold_min_save2[smp[id].unit] = sst->min2;
-				BC->threshold_max_save2[smp[id].unit] = sst->max2;
+				BC->threshold_option_save[sst->sensor] = sst->option;
+				BC->threshold_min_save[sst->sensor] = sst->min;
+				BC->threshold_max_save[sst->sensor] = sst->max;
 
 				if(sst->option == 'o' ||
 				   sst->option == 'i' ||
 				   sst->option == 'x') {
-					BC->threshold_option[smp[id].unit] = sst->option;
-					BC->threshold_min1[smp[id].unit] = sst->min1;
-					BC->threshold_max1[smp[id].unit] = sst->max1;
-					BC->threshold_min2[smp[id].unit] = sst->min2;
-					BC->threshold_max2[smp[id].unit] = sst->max2;
+					BC->threshold_option[sst->sensor] = sst->option;
+					BC->threshold_min[sst->sensor] = sst->min;
+					BC->threshold_max[sst->sensor] = sst->max;
 				} else if(sst->option == '<') {
-					BC->threshold_option[smp[id].unit] = 'o';
-					BC->threshold_min1[smp[id].unit] = sst->min1;
-					BC->threshold_max1[smp[id].unit] = 2147483647;
-					BC->threshold_min2[smp[id].unit] = sst->min2;
-					BC->threshold_max2[smp[id].unit] = 2147483647;
+					BC->threshold_option[sst->sensor] = 'o';
+					BC->threshold_min[sst->sensor] = sst->min;
+					BC->threshold_max[sst->sensor] = 2147483647;
 				} else if(sst->option == '>') {
-					BC->threshold_option[smp[id].unit] = 'o';
-					BC->threshold_min1[smp[id].unit] = -2147483647;
-					BC->threshold_max1[smp[id].unit] = sst->min1;
-					BC->threshold_min2[smp[id].unit] = -2147483647;
-					BC->threshold_max2[smp[id].unit] = sst->min2;
+					BC->threshold_option[sst->sensor] = 'o';
+					BC->threshold_min[sst->sensor] = -2147483647;
+					BC->threshold_max[sst->sensor] = sst->min;
 				} else {
 					BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 				}
 
-				BC->threshold_period_current[smp[id].unit] = BC->threshold_debounce;
+				BC->threshold_period_current[sst->sensor] = BC->threshold_debounce;
 
-				logbli("set threshold: %c %d %d %d %d (%d)\n\r", sst->option,
-				                                                 sst->min1,
-				                                                 sst->max1,
-				                                                 sst->min2,
-				                                                 sst->max2,
-				                                                 smp[id].unit);
+				logbli("set threshold: %c %d %d (%d)\n\r", sst->option,
+				                                           sst->min,
+				                                           sst->max,
+				                                           sst->sensor);
 				break;
 			}
 
@@ -124,15 +115,13 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				SimpleGetValueReturn sgvr;
 				sgvr.header = sgv->header;
 				sgvr.header.length = sizeof(SimpleGetValueReturn);
-
-				sgvr.value1 = BC->value1[smp[id].unit];
-				sgvr.value2 = BC->value2[smp[id].unit];
+				sgvr.value = BC->value[sgv->sensor];
 
 				BA->send_blocking_with_timeout(&sgvr,
 				                               sizeof(SimpleGetValueReturn),
 				                               com);
 
-				logbli("get value: %d %d\n\r", sgvr.value1, sgvr.value2);
+				logbli("get value (%d): %d\n\r", sgv->sensor, sgvr.value);
 				break;
 			}
 
@@ -142,13 +131,13 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgpr.header = sgp->header;
 				sgpr.header.length = sizeof(SimpleGetPeriodReturn);
 
-				sgpr.period = BC->signal_period[smp[id].unit];
+				sgpr.period = BC->signal_period[sgp->sensor];
 
 				BA->send_blocking_with_timeout(&sgpr,
 				                               sizeof(SimpleGetPeriodReturn),
 				                               com);
 
-				logbli("get period: %d\n\r", sgpr.period);
+				logbli("get period (%d): %d\n\r", sgp->sensor, sgpr.period);
 				break;
 			}
 
@@ -158,22 +147,19 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgtr.header = sgt->header;
 				sgtr.header.length = sizeof(SimpleGetThresholdReturn);
 
-				sgtr.option = BC->threshold_option_save[smp[id].unit];
-				sgtr.min1 = BC->threshold_min_save1[smp[id].unit];
-				sgtr.max1 = BC->threshold_max_save1[smp[id].unit];
-				sgtr.min2 = BC->threshold_min_save2[smp[id].unit];
-				sgtr.max2 = BC->threshold_max_save2[smp[id].unit];
+				sgtr.option = BC->threshold_option_save[sgt->sensor];
+				sgtr.min = BC->threshold_min_save[sgt->sensor];
+				sgtr.max = BC->threshold_max_save[sgt->sensor];
+
 
 				BA->send_blocking_with_timeout(&sgtr,
 				                               sizeof(SimpleGetThresholdReturn),
 				                               com);
 
-				logbli("get threshold: %c %d %d %d %d (%d)\n\r", sgtr.option,
-				                                                 sgtr.min1,
-				                                                 sgtr.max1,
-				                                                 sgtr.min2,
-				                                                 sgtr.max2,
-				                                                 smp[id].unit);
+				logbli("get threshold: %c %d %d (%d)\n\r", sgtr.option,
+				                                           sgtr.min,
+				                                           sgtr.max,
+				                                           sgt->sensor);
 				break;
 			}
 
@@ -200,23 +186,17 @@ void simple_constructor(void) {
 	BC->threshold_debounce = 100;
 
 	for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-		BC->value1[i] = 0;
-		BC->value2[i] = 0;
-		BC->last_value1[i] = 0xFFFFFFFF;
-		BC->last_value2[i] = 0xFFFFFFFF;
+		BC->value[i] = 0;
+		BC->last_value[i] = 0xFFFFFFFF;
 		BC->signal_period[i] = 0;
 		BC->signal_period_counter[i] = 0;
 		BC->threshold_period_current[i] = 0;
-		BC->threshold_min1[i] = 0;
-		BC->threshold_max1[i] = 0;
-		BC->threshold_min2[i] = 0;
-		BC->threshold_max2[i] = 0;
+		BC->threshold_min[i] = 0;
+		BC->threshold_max[i] = 0;
 		BC->threshold_option[i] = 'x';
 
-		BC->threshold_min_save1[i] = 0;
-		BC->threshold_max_save1[i] = 0;
-		BC->threshold_min_save2[i] = 0;
-		BC->threshold_max_save2[i] = 0;
+		BC->threshold_min_save[i] = 0;
+		BC->threshold_max_save[i] = 0;
 		BC->threshold_option_save[i] = 'x';
 	}
 
@@ -230,17 +210,23 @@ void simple_destructor(void) {
 	logbli("simple destructor\n\r");
 }
 
-void simple_tick(uint8_t tick_type) {
+void simple_tick(const uint8_t tick_type) {
 	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
 		// Get values
-		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			if(BC->tick % 6 == 2) {
-				BC->value1[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func1)(BC->value1[sup[i].call_value_id]);
-			} else if(BC->tick % 6 == 5){
-				BC->value2[i] = BRICKLET_OFFSET_SIMPLE(sup[i].func2)(BC->value2[sup[i].call_value_id]);
-			}
-		}
 
+		// If only one simple value is used, gcc removes the for loop and inserts
+		// the function, in this case there is no offset needed
+#ifdef BRICKLET_VALUE_APPLIED_OUTSIDE
+		// Nothing to do here
+#else
+#ifdef BRICKLET_NO_OFFSET
+		sup[0].func(0);
+#else
+		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
+			BRICKLET_OFFSET_SIMPLE(sup[0].func)(0);
+		}
+#endif
+#endif
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
 			if(BC->signal_period_counter[i] < UINT32_MAX) {
 				BC->signal_period_counter[i]++;
@@ -259,54 +245,47 @@ void simple_tick(uint8_t tick_type) {
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
 			if(BC->signal_period[i] != 0 &&
 			   BC->signal_period[i] <= BC->signal_period_counter[i]) {
-				if(BC->last_value1[i] != BC->value1[i] ||
-				   BC->last_value2[i] != BC->value2[i]) {
-					SimpleGetValueReturn sgvr;
-					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_period);
-					sgvr.value1 = BC->value1[i];
-					sgvr.value2 = BC->value2[i];
+				if(BC->last_value[i] != BC->value[i]) {
+					SimpleCallback sc;
+					BA->com_make_default_header(&sc, BS->uid, sizeof(SimpleCallback), sup[0].fid_period);
+					sc.sensor = i;
+					sc.value = BC->value[i];
 
-					BA->send_blocking_with_timeout(&sgvr,
-												   sizeof(SimpleGetValueReturn),
+
+					BA->send_blocking_with_timeout(&sc,
+												   sizeof(SimpleCallback),
 												   *BA->com_current);
 
+					logbli("period value: %d\n\r", BC->value[i]);
 					BC->signal_period_counter[i] = 0;
-					BC->last_value1[i] = BC->value1[i];
-					BC->last_value2[i] = BC->value2[i];
-					logbli("period value: %d %d\n\r", BC->value1[i],
-					                                  BC->value2[i]);
+					BC->last_value[i] = BC->value[i];
 				}
 			}
 		}
 
 		// Handle threshold signals
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			int32_t value1 = BC->value1[i];
-			int32_t value2 = BC->value2[i];
+			int32_t value = BC->value[i];
 
 			if(((BC->threshold_option[i] == 'o') &&
-				(((value1 < BC->threshold_min1[i]) ||
-				  (value1 > BC->threshold_max1[i])) ||
-				 ((value2 < BC->threshold_min2[i]) ||
-				  (value2 > BC->threshold_max2[i])))) ||
-			   (((BC->threshold_option[i] == 'i') &&
-				 ((value1 > BC->threshold_min1[i]) &&
-				  (value1 < BC->threshold_max1[i])) &&
-				 ((value2 > BC->threshold_min2[i]) &&
-				  (value2 < BC->threshold_max2[i]))))) {
+				((value < BC->threshold_min[i]) ||
+				 (value > BC->threshold_max[i]))) ||
+			   ((BC->threshold_option[i] == 'i') &&
+				((value > BC->threshold_min[i]) &&
+				 (value < BC->threshold_max[i])))) {
 
 				if(BC->threshold_period_current[i] == BC->threshold_debounce) {
-					SimpleGetValueReturn sgvr;
-					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_reached);
-					sgvr.value1 = value1;
-					sgvr.value2 = value2;
-					BA->send_blocking_with_timeout(&sgvr,
-												   sizeof(SimpleGetValueReturn),
+					SimpleCallback sc;
+					BA->com_make_default_header(&sc, BS->uid, sizeof(SimpleCallback), sup[0].fid_reached);
+					sc.sensor = i;
+					sc.value = value;
+
+					BA->send_blocking_with_timeout(&sc,
+												   sizeof(SimpleCallback),
 												   *BA->com_current);
 					BC->threshold_period_current[i] = 0;
 
-					logbli("threshold value: %d %d\n\r", BC->value1[i],
-														 BC->value2[i]);
+					logbli("threshold value: %d\n\r", BC->value[i]);
 				}
 			}
 		}
