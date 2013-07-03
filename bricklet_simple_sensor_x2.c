@@ -37,7 +37,7 @@ extern const SimpleMessageProperty smp[];
 extern const SimpleUnitProperty sup[];
 extern const uint8_t smp_length;
 
-void simple_invocation(const uint8_t com, const uint8_t *data) {
+void simple_invocation(const ComType com, const uint8_t *data) {
 	SimpleStandardMessage *standard_message = (SimpleStandardMessage*)data;
 	uint8_t id = standard_message->header.fid - 1;
 	if(id >= smp_length) {

@@ -21,7 +21,7 @@
 
 #include "bricklet_simple_x2.h"
 
-#ifdef BRICKLET_HAS_SIMPLE_SENSOR_SENSOR_X2
+#ifdef BRICKLET_HAS_SIMPLE_SENSOR_X2
 
 #include <stdint.h>
 
