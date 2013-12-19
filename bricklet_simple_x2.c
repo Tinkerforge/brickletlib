@@ -182,7 +182,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				SimpleGetDebounce* sgd = (SimpleGetDebounce*)data;
 				SimpleGetDebounceReturn sgdr;
 				sgdr.header = sgd->header;
-				sgdr.header.length = sizeof(SimpleGetThresholdReturn);
+				sgdr.header.length = sizeof(SimpleGetDebounceReturn);
 
 				sgdr.debounce = BC->threshold_debounce;
 
