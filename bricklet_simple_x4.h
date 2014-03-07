@@ -136,7 +136,6 @@ typedef struct {
 
 void simple_invocation(const ComType com, const uint8_t *data);
 void simple_constructor(void);
-void simple_destructor(void);
 void simple_tick(const uint8_t tick_type);
 #endif
 

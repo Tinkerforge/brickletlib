@@ -230,49 +230,20 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 void simple_constructor(void) {
 	BrickContext *BC_local = BC;
+
+	// We don't set the stuff that is initially 0, since BC is set to 0 by Brick on startup
 	BC_local->threshold_debounce = 100;
 
 	for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-		BC_local->value1[i] = 0;
-		BC_local->value2[i] = 0;
-        BC_local->value3[i] = 0;
-        BC_local->value4[i] = 0;
 		BC_local->last_value1[i] = 0xFFFFFFFF;
 		BC_local->last_value2[i] = 0xFFFFFFFF;
-        BC_local->last_value3[i] = 0xFFFFFFFF;
-        BC_local->last_value4[i] = 0xFFFFFFFF;
-		BC_local->signal_period[i] = 0;
-		BC_local->signal_period_counter[i] = 0;
-		BC_local->threshold_period_current[i] = 0;
-		BC_local->threshold_min1[i] = 0;
-		BC_local->threshold_max1[i] = 0;
-		BC_local->threshold_min2[i] = 0;
-		BC_local->threshold_max2[i] = 0;
-		BC_local->threshold_min3[i] = 0;
-		BC_local->threshold_max3[i] = 0;
-        BC_local->threshold_min4[i] = 0;
-		BC_local->threshold_max4[i] = 0;
+		BC_local->last_value3[i] = 0xFFFFFFFF;
+		BC_local->last_value4[i] = 0xFFFFFFFF;
 		BC_local->threshold_option[i] = 'x';
-
-		BC_local->threshold_min_save1[i] = 0;
-		BC_local->threshold_max_save1[i] = 0;
-		BC_local->threshold_min_save2[i] = 0;
-		BC_local->threshold_max_save2[i] = 0;
-		BC_local->threshold_min_save3[i] = 0;
-		BC_local->threshold_max_save3[i] = 0;
-        BC_local->threshold_min_save4[i] = 0;
-		BC_local->threshold_max_save4[i] = 0;
 		BC_local->threshold_option_save[i] = 'x';
 	}
 
-	BC_local->tick = 0;
-
 	logbli("simple constructor\n\r");
-}
-
-void simple_destructor(void) {
-	simple_constructor();
-	logbli("simple destructor\n\r");
 }
 
 void simple_tick(uint8_t tick_type) {
