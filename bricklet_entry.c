@@ -41,10 +41,12 @@ void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 			break;
 		}
 
+#ifndef BRICKLET_HAS_NO_DESTRUCTOR
 		case BRICKLET_TYPE_DESTRUCTOR: {
 			destructor();
 			break;
 		}
+#endif
 
 		case BRICKLET_TYPE_TICK: {
 			// Backward compatibility to versions without tick type
