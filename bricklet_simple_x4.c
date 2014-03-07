@@ -38,6 +38,7 @@ extern const SimpleUnitProperty sup[];
 extern const uint8_t smp_length;
 
 void simple_invocation(const ComType com, const uint8_t *data) {
+	BrickContext *BC_local = BC;
 	uint8_t id = ((SimpleStandardMessage*)data)->header.fid - 1;
 	if(id >= smp_length) {
 		return;
@@ -51,7 +52,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 			case SIMPLE_TRANSFER_PERIOD: {
 				SimpleSetPeriod *ssp = ((SimpleSetPeriod*)data);
-				BC->signal_period[smp[id].unit] = ssp->period;
+				BC_local->signal_period[smp[id].unit] = ssp->period;
 
 				logbli("set period: %d\n\r", ssp->period);
 				break;
@@ -59,54 +60,54 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 			case SIMPLE_TRANSFER_THRESHOLD: {
 				SimpleSetThreshold* sst = (SimpleSetThreshold*)data;
-				BC->threshold_option_save[smp[id].unit] = sst->option;
-				BC->threshold_min_save1[smp[id].unit] = sst->min1;
-				BC->threshold_max_save1[smp[id].unit] = sst->max1;
-				BC->threshold_min_save2[smp[id].unit] = sst->min2;
-				BC->threshold_max_save2[smp[id].unit] = sst->max2;
-				BC->threshold_min_save3[smp[id].unit] = sst->min3;
-				BC->threshold_max_save3[smp[id].unit] = sst->max3;
-                BC->threshold_min_save4[smp[id].unit] = sst->min4;
-				BC->threshold_max_save4[smp[id].unit] = sst->max4;
+				BC_local->threshold_option_save[smp[id].unit] = sst->option;
+				BC_local->threshold_min_save1[smp[id].unit] = sst->min1;
+				BC_local->threshold_max_save1[smp[id].unit] = sst->max1;
+				BC_local->threshold_min_save2[smp[id].unit] = sst->min2;
+				BC_local->threshold_max_save2[smp[id].unit] = sst->max2;
+				BC_local->threshold_min_save3[smp[id].unit] = sst->min3;
+				BC_local->threshold_max_save3[smp[id].unit] = sst->max3;
+                BC_local->threshold_min_save4[smp[id].unit] = sst->min4;
+				BC_local->threshold_max_save4[smp[id].unit] = sst->max4;
 
 				if(sst->option == 'o' ||
 				   sst->option == 'i' ||
 				   sst->option == 'x') {
-					BC->threshold_option[smp[id].unit] = sst->option;
-					BC->threshold_min1[smp[id].unit] = sst->min1;
-					BC->threshold_max1[smp[id].unit] = sst->max1;
-					BC->threshold_min2[smp[id].unit] = sst->min2;
-					BC->threshold_max2[smp[id].unit] = sst->max2;
-					BC->threshold_min3[smp[id].unit] = sst->min3;
-					BC->threshold_max3[smp[id].unit] = sst->max3;
-                    BC->threshold_min4[smp[id].unit] = sst->min4;
-					BC->threshold_max4[smp[id].unit] = sst->max4;
+					BC_local->threshold_option[smp[id].unit] = sst->option;
+					BC_local->threshold_min1[smp[id].unit] = sst->min1;
+					BC_local->threshold_max1[smp[id].unit] = sst->max1;
+					BC_local->threshold_min2[smp[id].unit] = sst->min2;
+					BC_local->threshold_max2[smp[id].unit] = sst->max2;
+					BC_local->threshold_min3[smp[id].unit] = sst->min3;
+					BC_local->threshold_max3[smp[id].unit] = sst->max3;
+                    BC_local->threshold_min4[smp[id].unit] = sst->min4;
+					BC_local->threshold_max4[smp[id].unit] = sst->max4;
 				} else if(sst->option == '<') {
-					BC->threshold_option[smp[id].unit] = 'o';
-					BC->threshold_min1[smp[id].unit] = sst->min1;
-					BC->threshold_max1[smp[id].unit] = 2147483647;
-					BC->threshold_min2[smp[id].unit] = sst->min2;
-					BC->threshold_max2[smp[id].unit] = 2147483647;
-					BC->threshold_min3[smp[id].unit] = sst->min3;
-					BC->threshold_max3[smp[id].unit] = 2147483647;
-                    BC->threshold_min4[smp[id].unit] = sst->min4;
-					BC->threshold_max4[smp[id].unit] = 2147483647;
+					BC_local->threshold_option[smp[id].unit] = 'o';
+					BC_local->threshold_min1[smp[id].unit] = sst->min1;
+					BC_local->threshold_max1[smp[id].unit] = 2147483647;
+					BC_local->threshold_min2[smp[id].unit] = sst->min2;
+					BC_local->threshold_max2[smp[id].unit] = 2147483647;
+					BC_local->threshold_min3[smp[id].unit] = sst->min3;
+					BC_local->threshold_max3[smp[id].unit] = 2147483647;
+                    BC_local->threshold_min4[smp[id].unit] = sst->min4;
+					BC_local->threshold_max4[smp[id].unit] = 2147483647;
 				} else if(sst->option == '>') {
-					BC->threshold_option[smp[id].unit] = 'o';
-					BC->threshold_min1[smp[id].unit] = -2147483647;
-					BC->threshold_max1[smp[id].unit] = sst->min1;
-					BC->threshold_min2[smp[id].unit] = -2147483647;
-					BC->threshold_max2[smp[id].unit] = sst->min2;
-					BC->threshold_min3[smp[id].unit] = -2147483647;
-					BC->threshold_max3[smp[id].unit] = sst->min3;
-                    BC->threshold_min4[smp[id].unit] = -2147483647;
-					BC->threshold_max4[smp[id].unit] = sst->min4;
+					BC_local->threshold_option[smp[id].unit] = 'o';
+					BC_local->threshold_min1[smp[id].unit] = -2147483647;
+					BC_local->threshold_max1[smp[id].unit] = sst->min1;
+					BC_local->threshold_min2[smp[id].unit] = -2147483647;
+					BC_local->threshold_max2[smp[id].unit] = sst->min2;
+					BC_local->threshold_min3[smp[id].unit] = -2147483647;
+					BC_local->threshold_max3[smp[id].unit] = sst->min3;
+                    BC_local->threshold_min4[smp[id].unit] = -2147483647;
+					BC_local->threshold_max4[smp[id].unit] = sst->min4;
 				} else {
 					BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 					return;
 				}
 
-				BC->threshold_period_current[smp[id].unit] = BC->threshold_debounce;
+				BC_local->threshold_period_current[smp[id].unit] = BC_local->threshold_debounce;
 
 				logbli("set threshold: %c %d %d %d %d %s %d (%d)\n\r", sst->option,
 				                                                       sst->min1,
@@ -123,7 +124,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 			case SIMPLE_TRANSFER_DEBOUNCE: {
 				SimpleSetDebounce *ssd = ((SimpleSetDebounce*)data);
-				BC->threshold_debounce = ssd->debounce;
+				BC_local->threshold_debounce = ssd->debounce;
 
 				logbli("set debounce: %d\n\r", ssd->debounce);
 				break;
@@ -146,10 +147,10 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgvr.header = sgv->header;
 				sgvr.header.length = sizeof(SimpleGetValueReturn);
 
-				sgvr.value1 = BC->value1[smp[id].unit];
-				sgvr.value2 = BC->value2[smp[id].unit];
-                sgvr.value3 = BC->value3[smp[id].unit];
-                sgvr.value4 = BC->value4[smp[id].unit];
+				sgvr.value1 = BC_local->value1[smp[id].unit];
+				sgvr.value2 = BC_local->value2[smp[id].unit];
+                sgvr.value3 = BC_local->value3[smp[id].unit];
+                sgvr.value4 = BC_local->value4[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgvr,
 				                               sizeof(SimpleGetValueReturn),
@@ -165,7 +166,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgpr.header = sgp->header;
 				sgpr.header.length = sizeof(SimpleGetPeriodReturn);
 
-				sgpr.period = BC->signal_period[smp[id].unit];
+				sgpr.period = BC_local->signal_period[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgpr,
 				                               sizeof(SimpleGetPeriodReturn),
@@ -181,15 +182,15 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgtr.header = sgt->header;
 				sgtr.header.length = sizeof(SimpleGetThresholdReturn);
 
-				sgtr.option = BC->threshold_option_save[smp[id].unit];
-				sgtr.min1 = BC->threshold_min_save1[smp[id].unit];
-				sgtr.max1 = BC->threshold_max_save1[smp[id].unit];
-				sgtr.min2 = BC->threshold_min_save2[smp[id].unit];
-				sgtr.max2 = BC->threshold_max_save2[smp[id].unit];
-				sgtr.min3 = BC->threshold_min_save3[smp[id].unit];
-				sgtr.max3 = BC->threshold_max_save3[smp[id].unit];
-                sgtr.min4 = BC->threshold_min_save4[smp[id].unit];
-				sgtr.max4 = BC->threshold_max_save4[smp[id].unit];
+				sgtr.option = BC_local->threshold_option_save[smp[id].unit];
+				sgtr.min1 = BC_local->threshold_min_save1[smp[id].unit];
+				sgtr.max1 = BC_local->threshold_max_save1[smp[id].unit];
+				sgtr.min2 = BC_local->threshold_min_save2[smp[id].unit];
+				sgtr.max2 = BC_local->threshold_max_save2[smp[id].unit];
+				sgtr.min3 = BC_local->threshold_min_save3[smp[id].unit];
+				sgtr.max3 = BC_local->threshold_max_save3[smp[id].unit];
+                sgtr.min4 = BC_local->threshold_min_save4[smp[id].unit];
+				sgtr.max4 = BC_local->threshold_max_save4[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgtr,
 				                               sizeof(SimpleGetThresholdReturn),
@@ -214,7 +215,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 				sgdr.header = sgd->header;
 				sgdr.header.length = sizeof(SimpleGetDebounceReturn);
 
-				sgdr.debounce = BC->threshold_debounce;
+				sgdr.debounce = BC_local->threshold_debounce;
 
 				BA->send_blocking_with_timeout(&sgdr,
 				                               sizeof(SimpleGetDebounceReturn),
@@ -228,42 +229,43 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 }
 
 void simple_constructor(void) {
-	BC->threshold_debounce = 100;
+	BrickContext *BC_local = BC;
+	BC_local->threshold_debounce = 100;
 
 	for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-		BC->value1[i] = 0;
-		BC->value2[i] = 0;
-        BC->value3[i] = 0;
-        BC->value4[i] = 0;
-		BC->last_value1[i] = 0xFFFFFFFF;
-		BC->last_value2[i] = 0xFFFFFFFF;
-        BC->last_value3[i] = 0xFFFFFFFF;
-        BC->last_value4[i] = 0xFFFFFFFF;
-		BC->signal_period[i] = 0;
-		BC->signal_period_counter[i] = 0;
-		BC->threshold_period_current[i] = 0;
-		BC->threshold_min1[i] = 0;
-		BC->threshold_max1[i] = 0;
-		BC->threshold_min2[i] = 0;
-		BC->threshold_max2[i] = 0;
-		BC->threshold_min3[i] = 0;
-		BC->threshold_max3[i] = 0;
-        BC->threshold_min4[i] = 0;
-		BC->threshold_max4[i] = 0;
-		BC->threshold_option[i] = 'x';
+		BC_local->value1[i] = 0;
+		BC_local->value2[i] = 0;
+        BC_local->value3[i] = 0;
+        BC_local->value4[i] = 0;
+		BC_local->last_value1[i] = 0xFFFFFFFF;
+		BC_local->last_value2[i] = 0xFFFFFFFF;
+        BC_local->last_value3[i] = 0xFFFFFFFF;
+        BC_local->last_value4[i] = 0xFFFFFFFF;
+		BC_local->signal_period[i] = 0;
+		BC_local->signal_period_counter[i] = 0;
+		BC_local->threshold_period_current[i] = 0;
+		BC_local->threshold_min1[i] = 0;
+		BC_local->threshold_max1[i] = 0;
+		BC_local->threshold_min2[i] = 0;
+		BC_local->threshold_max2[i] = 0;
+		BC_local->threshold_min3[i] = 0;
+		BC_local->threshold_max3[i] = 0;
+        BC_local->threshold_min4[i] = 0;
+		BC_local->threshold_max4[i] = 0;
+		BC_local->threshold_option[i] = 'x';
 
-		BC->threshold_min_save1[i] = 0;
-		BC->threshold_max_save1[i] = 0;
-		BC->threshold_min_save2[i] = 0;
-		BC->threshold_max_save2[i] = 0;
-		BC->threshold_min_save3[i] = 0;
-		BC->threshold_max_save3[i] = 0;
-        BC->threshold_min_save4[i] = 0;
-		BC->threshold_max_save4[i] = 0;
-		BC->threshold_option_save[i] = 'x';
+		BC_local->threshold_min_save1[i] = 0;
+		BC_local->threshold_max_save1[i] = 0;
+		BC_local->threshold_min_save2[i] = 0;
+		BC_local->threshold_max_save2[i] = 0;
+		BC_local->threshold_min_save3[i] = 0;
+		BC_local->threshold_max_save3[i] = 0;
+        BC_local->threshold_min_save4[i] = 0;
+		BC_local->threshold_max_save4[i] = 0;
+		BC_local->threshold_option_save[i] = 'x';
 	}
 
-	BC->tick = 0;
+	BC_local->tick = 0;
 
 	logbli("simple constructor\n\r");
 }
@@ -274,80 +276,81 @@ void simple_destructor(void) {
 }
 
 void simple_tick(uint8_t tick_type) {
+	BrickContext *BC_local = BC;
 	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			if(BC->signal_period_counter[i] < UINT32_MAX) {
-				BC->signal_period_counter[i]++;
+			if(BC_local->signal_period_counter[i] < UINT32_MAX) {
+				BC_local->signal_period_counter[i]++;
 			}
 
-			if(BC->threshold_period_current[i] != BC->threshold_debounce) {
-				BC->threshold_period_current[i]++;
+			if(BC_local->threshold_period_current[i] != BC_local->threshold_debounce) {
+				BC_local->threshold_period_current[i]++;
 			}
 		}
 
-		BC->tick++;
+		BC_local->tick++;
 	}
 
 	if(tick_type & TICK_TASK_TYPE_MESSAGE) {
 		// Handle period signals
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			if(BC->signal_period[i] != 0 &&
-			   BC->signal_period[i] <= BC->signal_period_counter[i]) {
-				if(BC->last_value1[i] != BC->value1[i] ||
-				   BC->last_value2[i] != BC->value2[i] ||
-                   BC->last_value3[i] != BC->value3[i] ||
-                   BC->last_value4[i] != BC->value4[i]) {
+			if(BC_local->signal_period[i] != 0 &&
+			   BC_local->signal_period[i] <= BC_local->signal_period_counter[i]) {
+				if(BC_local->last_value1[i] != BC_local->value1[i] ||
+				   BC_local->last_value2[i] != BC_local->value2[i] ||
+                   BC_local->last_value3[i] != BC_local->value3[i] ||
+                   BC_local->last_value4[i] != BC_local->value4[i]) {
 					SimpleGetValueReturn sgvr;
 					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_period);
-					sgvr.value1 = BC->value1[i];
-					sgvr.value2 = BC->value2[i];
-                    sgvr.value3 = BC->value3[i];
-                    sgvr.value4 = BC->value4[i];
+					sgvr.value1 = BC_local->value1[i];
+					sgvr.value2 = BC_local->value2[i];
+                    sgvr.value3 = BC_local->value3[i];
+                    sgvr.value4 = BC_local->value4[i];
 
 					BA->send_blocking_with_timeout(&sgvr,
 												   sizeof(SimpleGetValueReturn),
 												   *BA->com_current);
 
-					BC->signal_period_counter[i] = 0;
-					BC->last_value1[i] = BC->value1[i];
-					BC->last_value2[i] = BC->value2[i];
-                    BC->last_value3[i] = BC->value3[i];
-                    BC->last_value4[i] = BC->value4[i];
-					logbli("period value: %d %d %d %d\n\r", BC->value1[i],
-					                                        BC->value2[i],
-                                                            BC->value3[i],
-                                                            BC->value4[i]);
+					BC_local->signal_period_counter[i] = 0;
+					BC_local->last_value1[i] = BC_local->value1[i];
+					BC_local->last_value2[i] = BC_local->value2[i];
+                    BC_local->last_value3[i] = BC_local->value3[i];
+                    BC_local->last_value4[i] = BC_local->value4[i];
+					logbli("period value: %d %d %d %d\n\r", BC_local->value1[i],
+					                                        BC_local->value2[i],
+                                                            BC_local->value3[i],
+                                                            BC_local->value4[i]);
 				}
 			}
 		}
 
 		// Handle threshold signals
 		for(uint8_t i = 0; i < NUM_SIMPLE_VALUES; i++) {
-			int32_t value1 = BC->value1[i];
-			int32_t value2 = BC->value2[i];
-            int32_t value3 = BC->value3[i];
-            int32_t value4 = BC->value4[i];
+			int32_t value1 = BC_local->value1[i];
+			int32_t value2 = BC_local->value2[i];
+            int32_t value3 = BC_local->value3[i];
+            int32_t value4 = BC_local->value4[i];
 
-			if(((BC->threshold_option[i] == 'o') &&
-				(((value1 < BC->threshold_min1[i]) ||
-				  (value1 > BC->threshold_max1[i])) ||
-				 ((value2 < BC->threshold_min2[i]) ||
-				  (value2 > BC->threshold_max2[i])) ||
-				 ((value3 < BC->threshold_min3[i]) ||
-				  (value3 > BC->threshold_max3[i])) ||
-                 ((value4 < BC->threshold_min4[i]) ||
-                  (value4 > BC->threshold_max4[i])))) ||
-			   (((BC->threshold_option[i] == 'i') &&
-				 ((value1 > BC->threshold_min1[i]) &&
-				  (value1 < BC->threshold_max1[i])) &&
-				 ((value2 > BC->threshold_min2[i]) &&
-				  (value2 < BC->threshold_max2[i])) &&
-				 ((value3 > BC->threshold_min3[i]) &&
-				  (value3 < BC->threshold_max3[i])) &&
-                 ((value4 > BC->threshold_min4[i]) &&
-                  (value4 < BC->threshold_max4[i]))))) {
+			if(((BC_local->threshold_option[i] == 'o') &&
+				(((value1 < BC_local->threshold_min1[i]) ||
+				  (value1 > BC_local->threshold_max1[i])) ||
+				 ((value2 < BC_local->threshold_min2[i]) ||
+				  (value2 > BC_local->threshold_max2[i])) ||
+				 ((value3 < BC_local->threshold_min3[i]) ||
+				  (value3 > BC_local->threshold_max3[i])) ||
+                 ((value4 < BC_local->threshold_min4[i]) ||
+                  (value4 > BC_local->threshold_max4[i])))) ||
+			   (((BC_local->threshold_option[i] == 'i') &&
+				 ((value1 > BC_local->threshold_min1[i]) &&
+				  (value1 < BC_local->threshold_max1[i])) &&
+				 ((value2 > BC_local->threshold_min2[i]) &&
+				  (value2 < BC_local->threshold_max2[i])) &&
+				 ((value3 > BC_local->threshold_min3[i]) &&
+				  (value3 < BC_local->threshold_max3[i])) &&
+                 ((value4 > BC_local->threshold_min4[i]) &&
+                  (value4 < BC_local->threshold_max4[i]))))) {
 
-				if(BC->threshold_period_current[i] == BC->threshold_debounce) {
+				if(BC_local->threshold_period_current[i] == BC_local->threshold_debounce) {
 					SimpleGetValueReturn sgvr;
 					BA->com_make_default_header(&sgvr, BS->uid, sizeof(SimpleGetValueReturn), sup[i].fid_reached);
 					sgvr.value1 = value1;
@@ -357,12 +360,12 @@ void simple_tick(uint8_t tick_type) {
 					BA->send_blocking_with_timeout(&sgvr,
 												   sizeof(SimpleGetValueReturn),
 												   *BA->com_current);
-					BC->threshold_period_current[i] = 0;
+					BC_local->threshold_period_current[i] = 0;
 
-					logbli("threshold value: %d %d %d %d\n\r", BC->value1[i],
-														       BC->value2[i],
-                                                               BC->value3[i],
-                                                               BC->value4[i]);
+					logbli("threshold value: %d %d %d %d\n\r", BC_local->value1[i],
+					                                           BC_local->value2[i],
+					                                           BC_local->value3[i],
+					                                           BC_local->value4[i]);
 				}
 			}
 		}
