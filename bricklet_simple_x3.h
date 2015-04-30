@@ -50,8 +50,6 @@ typedef struct {
 } SimpleMessageProperty;
 
 typedef struct {
-	value_handler_func_t func1;
-	value_handler_func_t func2;
 	uint8_t signedness;
 	uint8_t fid_period;
 	uint8_t fid_reached;

@@ -25,12 +25,7 @@
 
 #include <stdint.h>
 
-#include "bricklib/drivers/adc/adc.h"
-#include "bricklib/bricklet/bricklet_communication.h"
-#include "bricklib/utility/init.h"
-
 #include "config.h"
-
 #include "brickletlib/bricklet_debug.h"
 
 extern const SimpleMessageProperty smp[];
@@ -138,7 +133,7 @@ void simple_invocation(const ComType com, const uint8_t *data) {
 
 				sgvr.value1 = BC->value1[smp[id].unit];
 				sgvr.value2 = BC->value2[smp[id].unit];
-                sgvr.value3 = BC->value2[smp[id].unit];
+                sgvr.value3 = BC->value3[smp[id].unit];
 
 				BA->send_blocking_with_timeout(&sgvr,
 				                               sizeof(SimpleGetValueReturn),
