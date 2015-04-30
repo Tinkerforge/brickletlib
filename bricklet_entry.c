@@ -28,6 +28,8 @@
 #include "bricklib/utility/init.h"
 #include "config.h"
 
+const uint32_t device_identifier __attribute__ ((section(".device_identifier"))) = BRICKLET_DEVICE_IDENTIFIER;
+
 #ifndef ENTRY_IN_BRICKLET_CODE
 void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 	switch(type) {
@@ -72,7 +74,7 @@ void entry(const uint8_t type, const uint8_t com, uint8_t *data) {
 			bs->hardware_version[1] = BC->hardware_version[1];
 			bs->hardware_version[2] = BC->hardware_version[2];
 #endif
-			bs->device_identifier   = BRICKLET_DEVICE_IDENTIFIER;
+			bs->device_identifier   = device_identifier;
 			break;
 		}
 
