@@ -14,8 +14,12 @@ SECTIONS {
 		*(.rodata)
 	}
 
-	.data.re.ro : {
+	.data.rel.ro : {
 		*(.data.rel.ro)
+	}
+
+	.data.rel.ro.local : {
+		*(.data.rel.ro.local)
 	}
 
 	.dynsym : {
